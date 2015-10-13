@@ -34,23 +34,6 @@
         ldr (.getContextClassLoader thr)]
     (.getResourceAsStream ldr path)))
 
-;; TODO: remove
-(comment
-  (defn load-library-from-jar [name]
-    (let [binary-path (find-library-native-path)
-          lib (System/mapLibraryName name)
-          tmp (File/createTempFile lib "")
-          in (load-resource (str binary-path lib))
-          out (FileOutputStream. tmp)]
-
-      (io/copy in out)
-      (.close out)
-      (.close in)
-
-      ;; load the library and remove tmp file on exit
-      (System/load (.getAbsolutePath tmp))
-      (.deleteOnExit tmp))))
-
 (defn load-file-from-jar
   ([file] (load-file-from-jar "" file))
   ([path file]

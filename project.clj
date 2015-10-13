@@ -21,3 +21,6 @@
               :resource-paths ["dev-resources"]
               :aot :all}
              })
+
+;; lein with-profiles uberjar-test  uberjar
+;; java -jar target/native-library-loader-0.1.0-SNAPSHOT-standalone.jar -m native-library-loader.core-test
