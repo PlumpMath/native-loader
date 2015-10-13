@@ -25,9 +25,6 @@
       ["Solaris" "x86_64"]  "solaris/x86_64/"
       (throw (Exception. (str "Unsupported OS/archetype: " os-name " " os-arch))))))
 
-(defn- find-library-native-path []
-  (str "native/" (find-library-path)))
-
 (defn- load-resource
   [path]
   (let [thr (Thread/currentThread)
@@ -35,23 +32,31 @@
     (.getResourceAsStream ldr path)))
 
 (defn load-file-from-jar
+  "Loads file from current JAR archive. The file will be copied to temp dir and
+  return the new path."
   ([file] (load-file-from-jar "" file))
   ([path file]
    (let [tmp (File/createTempFile file "")
          is (load-resource (str path file))
          os (FileOutputStream. tmp)]
 
-     (io/copy is os)
+     ;; Copy data between source file in JAR and the
+     ;; temporary file
+     (clojure.java.io/copy is os)
      (.close os)
      (.close is)
-
+     ;; remove file when exit application
      (.deleteOnExit tmp)
      ;; return tmp file path
      (.getAbsolutePath tmp))))
 
-(defn load-library-from-jar [name]
-  (System/load
-   (load-file-from-jar (find-library-native-path) (System/mapLibraryName name))))
+(defn load-library-from-jar
+  "Loads library from current JAR archive."
+  ([name]
+   (load-library-from-jar "native/" name))
+  ([prefix name]
+   (System/load
+    (load-file-from-jar (str prefix (find-library-path)) (System/mapLibraryName name)))))
 
 (defn load-library [name]
   (try
