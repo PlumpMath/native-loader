@@ -1,10 +1,8 @@
-(ns native-library-loader.core
+(ns coldnew.native-loader
   (:require [clojure.string :as str]
             [clojure.java.io :as io])
-  (:import [java.io File FileOutputStream]))
-
-(gen-class
- :name coldnew.NativeLibLoader)
+  (:import [java.io File FileOutputStream])
+  (:gen-class))
 
 ;;; Reference:
 ;; https://github.com/circleci/clj-v8/blob/e22fc83af27db06d338f2924fa1c3212b0d1a84b/clj-v8/src/v8/core.clj

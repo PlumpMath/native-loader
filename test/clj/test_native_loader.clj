@@ -1,5 +1,5 @@
-(ns native-library-loader.core-test
-  (:require [native-library-loader.core :refer :all])
+(ns test-native-loader
+  (:require [coldnew.native-loader :refer :all])
   (:import [org.opencv.core Mat Size CvType]
            [org.opencv.imgcodecs Imgcodecs]
            [org.opencv.imgproc Imgproc])
