@@ -1,8 +1,10 @@
 (ns native-library-loader.core
   (:require [clojure.string :as str]
             [clojure.java.io :as io])
-  (:import [java.io File FileOutputStream])
-  (:gen-class))
+  (:import [java.io File FileOutputStream]))
+
+(gen-class
+ :name coldnew.NativeLibLoader)
 
 ;;; Reference:
 ;; https://github.com/circleci/clj-v8/blob/e22fc83af27db06d338f2924fa1c3212b0d1a84b/clj-v8/src/v8/core.clj
@@ -32,20 +34,41 @@
         ldr (.getContextClassLoader thr)]
     (.getResourceAsStream ldr path)))
 
+;; TODO: remove
+(comment
+  (defn load-library-from-jar [name]
+    (let [binary-path (find-library-native-path)
+          lib (System/mapLibraryName name)
+          tmp (File/createTempFile lib "")
+          in (load-resource (str binary-path lib))
+          out (FileOutputStream. tmp)]
+
+      (io/copy in out)
+      (.close out)
+      (.close in)
+
+      ;; load the library and remove tmp file on exit
+      (System/load (.getAbsolutePath tmp))
+      (.deleteOnExit tmp))))
+
+(defn load-file-from-jar
+  ([file] (load-file-from-jar "" file))
+  ([path file]
+   (let [tmp (File/createTempFile file "")
+         is (load-resource (str path file))
+         os (FileOutputStream. tmp)]
+
+     (io/copy is os)
+     (.close os)
+     (.close is)
+
+     (.deleteOnExit tmp)
+     ;; return tmp file path
+     (.getAbsolutePath tmp))))
+
 (defn load-library-from-jar [name]
-  (let [binary-path (find-library-native-path)
-        lib (System/mapLibraryName name)
-        tmp (File/createTempFile lib "")
-        in (load-resource (str binary-path lib))
-        out (FileOutputStream. tmp)]
-
-    (io/copy in out)
-    (.close out)
-    (.close in)
-
-    ;; load the library and remove tmp file on exit
-    (System/load (.getAbsolutePath tmp))
-    (.deleteOnExit tmp)))
+  (System/load
+   (load-file-from-jar (find-library-native-path) (System/mapLibraryName name))))
 
 (defn load-library [name]
   (try
